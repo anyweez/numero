@@ -1,0 +1,22 @@
+{
+  "name": "numpat",
+  "version": "0.0.1",
+  "description": "Find a combination of operations that can be used to build an equation out of a string of digits.",
+  "main": "numpat.js",
+  "scripts": {
+    "test": "node test/numpat.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anyweez/numpat.git"
+  },
+  "author": "Luke Segars (@anyweez)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anyweez/numpat/issues"
+  },
+  "homepage": "https://github.com/anyweez/numpat#readme",
+  "dependencies": {
+    "chai": "^3.4.1"
+  }
+}
