@@ -29,8 +29,7 @@ If you want to use the library in Node, you can
 ```js
 var numpat = require('numpat')
 
-var pattern = numpat(674518);
-pattern.solve().map(function(solution) {
+numpat(674518).solve().map(function(solution) {
     console.log('Equation: ' + solution.equation());
 });
 ```
