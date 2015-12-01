@@ -2,19 +2,29 @@
 'use strict';
 
 var _ = require('lodash');
+var debug = false;
+
+function dbg(string) {
+    if (debug) console.log('[Debug] ' + string);
+}
+
+function leaf(expression) {
+    return (typeof expression === 'number');
+}
+
 
 function exp2str(exp, spacing) {
     spacing = spacing || 0;
     var space = new Array(spacing * 2 + 1).join(' ');
 
     var text = '';
-    if (typeof exp === 'number') {
+    if (leaf(exp)) {
         text += space + '+ LeafExpression:\n';
         text += space + '  - value: ' + exp + '\n';
     } else {
         if (exp.operation === undefined) {
-            console.log('operation undefined');
-            console.log(exp);
+            dbg('operation undefined');
+            dbg(exp);
         }
         text += space + '+ BranchExpression:\n';
         text += space + '  - operation: ';
@@ -107,10 +117,10 @@ module.exports = (function () {
                 var newExp = new Expression(expression.subexpressions);
 
                 newExp.operation = operations[i];
-                console.log('--- operation assignment ---');
-                console.log('--- before');
+                dbg('--- operation assignment ---');
+                dbg('--- before');
                 expression.print();
-                console.log('--- after');
+                dbg('--- after');
                 newExp.print();
                 exps = exps.concat(evaluate(newExp));
             }
@@ -130,7 +140,7 @@ module.exports = (function () {
         // For each potential split point, recursively determine whether
         // there is any combo of operations that'd make the statements true.
         return potentials.map(function (potential) {
-            console.log("/-/-/-/ POTENTIAL PATTERN /-/-/-/");
+            dbg("/-/-/-/ POTENTIAL PATTERN /-/-/-/");
             potential.print();
 
             var p1 = evaluate(potential.subexpressions[0]);
@@ -203,8 +213,7 @@ module.exports = (function () {
      * An expression is also invalid if it doesn't have an operation defined for each node.
      */
     Expression.prototype.valid = function () {
-        console.log('--- validation ---');
-        this.print();
+        dbg('--- validation ---');
         // If there's only a single subexpression with no matching operator.
         if (this.subexpressions.length == 1 && this.operation === null) return true;
         if (this.subexpressions.length > 2) return false;
@@ -212,12 +221,12 @@ module.exports = (function () {
         if (this.operation !== null) {
             // If we've got a pair of subexpressions and an operator to use to combine them.
             return this.subexpressions.map(function (subexp) {
-                if (typeof subexp === 'number') return true;
+                if (leaf(subexp)) return true;
                 else if (subexp instanceof Expression) {
                     return subexp.valid();
                 } else {
-                    console.log('--- subexp ---');
-                    console.log(subexp);
+                    dbg('--- subexp ---');
+                    dbg(subexp);
                     throw Error("Invalid subexpression type encountered during validation.");
                 }
             }).reduce(function (prev, current) {
@@ -232,7 +241,7 @@ module.exports = (function () {
 
     Expression.prototype.result = function () {
         // If it's a leaf node, return the value of the sole subexpression. Base case.
-        if (this.operation === null && this.subexpressions.length == 1 && typeof this.subexpressions[0] === 'number') {
+        if (this.operation === null && this.subexpressions.length == 1 && leaf(this.subexpressions[0])) {
             return this.subexpressions[0];
             // If it's a single-child node, return the child.
             // TODO: minimize the count of these...I believe this level of nesting is unnecessary.
@@ -241,18 +250,38 @@ module.exports = (function () {
         }
         // Otherwise, recursively evaluate all subexpressions.
         else {
-            console.log('----- result -----');
+            dbg('----- result -----');
             this.print();
             // Currently assumes two operands (0 and 1).
             return this.operation.op(
-                typeof this.subexpressions[0] === 'number' ? this.subexpressions[0] : this.subexpressions[0].result(),
-                typeof this.subexpressions[1] === 'number' ? this.subexpressions[1] : this.subexpressions[1].result()
+                leaf(this.subexpressions[0]) ? this.subexpressions[0] : this.subexpressions[0].result(),
+                leaf(this.subexpressions[1]) ? this.subexpressions[1] : this.subexpressions[1].result()
             );
         }
     };
 
-    Expression.prototype.print = function () {
-        console.log(exp2str(this));
+    Expression.prototype.print = function (override) {
+        if (override) {
+            console.log(exp2str(this));
+        } else {
+            dbg(exp2str(this));
+        }
+    };
+
+    Expression.prototype.equation = function () {
+        var parts = [];
+
+        if (leaf(this.subexpressions[0])) parts.push(this.subexpressions[0]);
+        else {
+            parts = parts.concat(this.subexpressions[0].equation());
+        }
+
+        parts.push(this.operation.symbol);
+
+        if (leaf(this.subexpressions[1])) parts.push(this.subexpressions[1]);
+        else parts = parts.concat(this.subexpressions[1].equation());
+
+        return parts.join(' ');
     };
 
     /**

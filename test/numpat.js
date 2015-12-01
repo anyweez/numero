@@ -46,8 +46,8 @@ describe('#valid', function () {
     it.only('[temp] multi-step solving', function () {
         var pattern = numpat(14481);
         pattern.solve().map(function (result) {
-            console.log("/-/-/-/ SOLUTION /-/-/-/");
-            result.print();
+            console.log('As equation:', result.equation());
+            result.print(true);
             expect(result.valid()).to.be.equal(true);
         });
     });
