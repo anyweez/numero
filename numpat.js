@@ -49,24 +49,28 @@ module.exports = (function () {
     var operations = [{
             'symbol': '*',
             'precedence': 1,
+            'associative': true,
             'op': function (first, second) {
                 return first * second;
             },
         }, {
             'symbol': '+',
-            'precendence': 2,
+            'precedence': 3,
+            'associative': true,
             'op': function (first, second) {
                 return first + second;
             },
         }, {
             'symbol': '-',
-            'precendence': 2,
+            'precedence': 2,
+            'associative': false,
             'op': function (first, second) {
                 return first - second;
             },
         }, {
             'symbol': '/',
-            'precendence': 1,
+            'precedence': 1,
+            'associative': false,
             'op': function (first, second) {
                 return first / second;
             },
@@ -194,7 +198,9 @@ module.exports = (function () {
             // Add the equal operation.
             exp.operation = {
                 'symbol': '=',
-                'precedence': 0,
+                // low precendence since it shouldn't be evaluated until literally everything
+                // else is done
+                'precedence': 10,
                 'op': function (first, second) {
                     return first === second;
                 },
@@ -276,7 +282,20 @@ module.exports = (function () {
         if (leaf(this.subexpressions[0])) {
             parts.push(this.subexpressions[0]);
         } else {
-            parts = parts.concat(this.subexpressions[0].equation());
+            if (this.subexpressions[0].operation === null) {
+                parts = parts.concat(this.subexpressions[0].equation());
+            } else {
+                var pprec = this.operation.precedence;
+                var cprec = this.subexpressions[0].operation.precedence;
+                // If there's a precedence gap, we always need parentheses.
+                if (cprec > pprec || (cprec == pprec && !this.operation.associative)) {
+                    parts.push('(');
+                    parts = parts.concat(this.subexpressions[0].equation());
+                    parts.push(')');
+                } else {
+                    parts = parts.concat(this.subexpressions[0].equation());
+                }
+            }
         }
 
         // Add the operation symbol
@@ -287,7 +306,20 @@ module.exports = (function () {
             if (leaf(this.subexpressions[1])) {
                 parts.push(this.subexpressions[1]);
             } else {
-                parts = parts.concat(this.subexpressions[1].equation());
+                if (this.subexpressions[1].operation === null) {
+                    parts = parts.concat(this.subexpressions[1].equation());
+                } else {
+                    var pprec = this.operation.precedence;
+                    var cprec = this.subexpressions[1].operation.precedence;
+                    // If there's a precedence gap, we always need parentheses.
+                    if (cprec > pprec || (cprec == pprec && (!this.operation.associative || !this.subexpressions[1].operation.associative))) {
+                        parts.push('(');
+                        parts = parts.concat(this.subexpressions[1].equation());
+                        parts.push(')');
+                    } else {
+                        parts = parts.concat(this.subexpressions[1].equation());
+                    }
+                }
             }
         }
 

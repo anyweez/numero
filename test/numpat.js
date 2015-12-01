@@ -3,56 +3,91 @@ var numpat = require('../numpat');
 var expect = require('chai').expect;
 
 var solutionSet = [{
-        input: 14481,
-        outputs: [
-        '1 + 4 + 4 = 8 + 1',
-        '1 * 4 + 4 = 8 * 1',
-    ],
-}, {
-        input: 1113,
-        outputs: [
+    input: 1113,
+    outputs: [
         '1 + 1 + 1 = 3',
     ],
 }, {
-        input: 178,
-        outputs: [
+    input: 178,
+    outputs: [
         '1 + 7 = 8',
     ],
 }, {
-        input: 718,
-        outputs: [
+    input: 718,
+    outputs: [
         '7 + 1 = 8',
     ],
 }, {
-        input: 716,
-        outputs: [
+    input: 716,
+    outputs: [
         '7 - 1 = 6',
         '7 = 1 + 6',
     ],
 }, {
-        input: 824,
-        outputs: [
+    input: 824,
+    outputs: [
         '8 / 2 = 4',
         '8 = 2 * 4',
     ],
 }, {
-        input: 3264,
-        outputs: [
-        '3 = 2 * 6 / 4',
+    input: 2138,
+    outputs: [
+        '2 * ( 1 + 3 ) = 8'
+    ],
+}, {
+    input: 3264,
+    outputs: [
+        '3 = 2 * ( 6 / 4 )',
         '3 / 2 = 6 / 4',
     ],
-}
-];
+}, {
+    input: 14481,
+    outputs: [
+        '1 = 4 + 4 - ( 8 - 1 )',
+        '1 - 4 = 4 - ( 8 - 1 )',
+        '1 * ( 4 + 4 ) = 8 * 1',
+        '1 * ( 4 + 4 ) = 8 / 1',
+        '1 + 4 + 4 = 8 + 1',
+        '1 + 4 + 4 - 8 = 1',
+        '1 - ( 4 + 4 - 8 ) = 1',
+    ],
+}, {
+    input: 91208,
+    outputs: [
+        '9 + 1 = 2 + 0 + 8',
+        '9 + 1 = 2 - ( 0 - 8 )',
+        '9 + 1 - 2 = 0 + 8',
+        '9 - ( 1 + 2 * 0 ) = 8',
+        '9 - ( 1 - 2 * 0 ) = 8',
+        '9 + 1 - ( 2 + 0 ) = 8',
+        '9 + 1 - ( 2 - 0 ) = 8',
+    ],
+}, {
+    input: 674518,
+    outputs: [
+        '6 = 7 - ( 4 + 5 - 1 * 8 )',
+        '6 = 7 + 4 / ( 5 - ( 1 + 8 ) )',
+        '6 - 7 = 4 / ( 5 - ( 1 + 8 ) )',
+        '6 + 7 - 4 * 5 = 1 - 8',
+        '6 - ( 7 - ( 4 + 5 ) ) = 1 * 8',
+        '6 - ( 7 - ( 4 + 5 * 1 ) ) = 8',
+        '6 - ( 7 - ( 4 + 5 / 1 ) ) = 8',
+    ],
+}];
 
 function displayOutputs(solution) {
     return solution.outputs.map(function (out) {
-        return '[' + out + ']';
+        return '\n\t' + out;
     }).reduce(function (prev, current) {
         return prev + current + '\t';
     }, '');
 
 }
 
+/**
+ * Check whether the equations for any of the solutions match the provided pattern.
+ * This is a standard string match, nothing fancy at all.
+ */
 function solutionExists(solutions, pattern) {
     return solutions.map(function (item) {
         return item.equation();
@@ -61,7 +96,17 @@ function solutionExists(solutions, pattern) {
     }).length > 0;
 }
 
+/**
+ * Check whether every provided solution is contained in the solutions
+ * result array. Basically just executed solutionExists() with each of the
+ * provided patterns and returns the && of those results.
+ */
 function allSolutionsExist(solutions, patterns) {
+    // Temporary: just for output purposes.
+    solutions.map(function (solution) {
+        //        console.log('    ' + solution.equation());
+    });
+
     return patterns.map(function (pattern) {
         return solutionExists(solutions, pattern);
     }).reduce(function (prev, current) {
@@ -114,10 +159,5 @@ describe('test a bunch of number sequences', function () {
                 allSolutionsExist(numpat(solution.input).solve(), solution.outputs)
             ).to.be.true;
         });
-    });
-
-    numpat(1134).solve().map(function (solution) {
-        console.log(solution.equation());
-        solution.print(true);
     });
 });
