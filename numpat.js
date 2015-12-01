@@ -1,6 +1,13 @@
 /* jslint node: true */
 'use strict';
 
+/**
+ *  // FIXME: add support for four key operations
+ *  // FIXME: add a bunch of new tests using equation() to evaluate
+ *  // FIXME: simple web page to showcase
+ *  // FIXME: % of numbers that can have an equation written for them
+ */
+
 var _ = require('lodash');
 var debug = false;
 
@@ -11,7 +18,6 @@ function dbg(string) {
 function leaf(expression) {
     return (typeof expression === 'number');
 }
-
 
 function exp2str(exp, spacing) {
     spacing = spacing || 0;
@@ -40,37 +46,32 @@ function exp2str(exp, spacing) {
 }
 
 module.exports = (function () {
-    var operations = [
-        /*{
-                    'symbol': '*',
-                    'precedence': 1,
-                    'op': function (first, second) {
-                        return first * second;
-                    },
-            }, */
-        {
+    var operations = [{
+            'symbol': '*',
+            'precedence': 1,
+            'op': function (first, second) {
+                return first * second;
+            },
+        }, {
             'symbol': '+',
             'precendence': 2,
             'op': function (first, second) {
                 return first + second;
             },
-    },
-        /*
-                {
-                    'symbol': '-',
-                    'precendence': 2,
-                    'op': function (first, second) {
-                        return first - second;
-                    },
-                   },
-                {
-                              'symbol': '/',
-                              'precendence': 1,
-                              'op': function (first, second) {
-                                  return first / second;
-                              },
-                          }*/
-        ];
+        }, {
+            'symbol': '-',
+            'precendence': 2,
+            'op': function (first, second) {
+                return first - second;
+            },
+        }, {
+            'symbol': '/',
+            'precendence': 1,
+            'op': function (first, second) {
+                return first / second;
+            },
+        }
+    ];
 
     /**
      * Generates all valid subexpressions for the given expression using all operations
@@ -184,7 +185,7 @@ module.exports = (function () {
         var exps = [];
 
         for (var i = 1; i < this.subexpressions.length; i++) {
-            // TODO: Creating too many extra expression here.
+            // TODO: Creating too many extra expressions here.
             var exp = new Expression([
                 new Expression(this.subexpressions.slice(0, i)),
                 new Expression(this.subexpressions.slice(i, this.subexpressions.length)),
@@ -271,23 +272,30 @@ module.exports = (function () {
     Expression.prototype.equation = function () {
         var parts = [];
 
-        if (leaf(this.subexpressions[0])) parts.push(this.subexpressions[0]);
-        else {
+        // Add the first operand
+        if (leaf(this.subexpressions[0])) {
+            parts.push(this.subexpressions[0]);
+        } else {
             parts = parts.concat(this.subexpressions[0].equation());
         }
 
-        parts.push(this.operation.symbol);
+        // Add the operation symbol
+        if (this.operation !== null) {
+            parts.push(this.operation.symbol);
 
-        if (leaf(this.subexpressions[1])) parts.push(this.subexpressions[1]);
-        else parts = parts.concat(this.subexpressions[1].equation());
+            // Add the second operand iff the operation is defined.
+            if (leaf(this.subexpressions[1])) {
+                parts.push(this.subexpressions[1]);
+            } else {
+                parts = parts.concat(this.subexpressions[1].equation());
+            }
+        }
 
         return parts.join(' ');
     };
 
     /**
      * Creates a new Expression object with each digit as a distinct subexpression.
-     *  
-     * TODO: isLeaf isn't being set correctly.
      */
     function Expression(elements, options) {
         options = options || {};
