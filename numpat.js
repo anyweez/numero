@@ -2,8 +2,6 @@
 'use strict';
 
 /**
- *  // FIXME: add support for four key operations
- *  // FIXME: add a bunch of new tests using equation() to evaluate
  *  // FIXME: simple web page to showcase
  *  // FIXME: % of numbers that can have an equation written for them
  */

@@ -73,6 +73,12 @@ var solutionSet = [{
         '6 - ( 7 - ( 4 + 5 * 1 ) ) = 8',
         '6 - ( 7 - ( 4 + 5 / 1 ) ) = 8',
     ],
+}, {
+    input: 74235,
+    outputs: [
+        '7 + 4 * 2 = 3 * 5',
+        '7 + ( 4 - 2 * 3 ) = 5',
+    ],
 }];
 
 function displayOutputs(solution) {

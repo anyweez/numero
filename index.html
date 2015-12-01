@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>numpat demo</title>
+    <script src="static/numpat.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Indie+Flower" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="static/style.css">
+
+    <script type="text/javascript">
+        /**
+         * Create a closure that maintains the list of equations that should
+         * be displayed.
+         */
+        var solutions = (function () {
+            var items = [];
+            var counter = 0;
+
+            return {
+                update: function (content) {
+                    items.length = 0;
+                    items = items.concat(content);
+                },
+
+                clear: function () {
+                    this.update([]);
+                },
+
+                next: function () {
+                    if (items.length > 0) {
+                        counter = (counter + 1) % items.length
+                        return items[counter];
+                    } else {
+                        return "...nothing.";
+                    }
+                },
+
+                count: function () {
+                    return items.length;
+                },
+            };
+        }());
+
+        function rotate() {
+            document.getElementById('display').innerHTML = solutions.next();
+        };
+
+        var timer = setInterval(rotate, 10000);
+
+        /**
+         * Attach an event listener to the text box when the window has fully
+         * loaded. The event listener should make all of the numpat calls and
+         * also manage error conditions + their implications for the UI.
+         */
+        window.addEventListener('load', function () {
+            var sequence = document.getElementById('sequence');
+
+            sequence.addEventListener('keyup', function () {
+                // Any time a key is pressed the available equations should be cleared.
+                solutions.clear();
+
+                try {
+                    if (isNaN(parseInt(sequence.value))) {
+                        throw Error('Digits only!');
+                    }
+
+                    var pattern = numpat(parseInt(sequence.value));
+
+                    // Convert all solutions to equations then update the solution
+                    // tracker.
+                    solutions.update(pattern.solve().map(function (solution) {
+                        return solution.equation();
+                    }));
+
+                    // If we finish all of this work without any exceptions
+                    // being thrown, go ahead and remove the invalid status.
+                    sequence.classList.remove('invalid');
+                    rotate();
+                } catch (e) {
+                    console.error(e.message);
+                    sequence.classList.add('invalid');
+                }
+
+                // Rotate / refresh since the old equation likely won't apply anymore
+                rotate();
+                // Reset the timer.
+                clearInterval(timer);
+                timer = setInterval(rotate, 10000);
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <a href="https://github.com/anyweez/numpat"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
+
+    <div id="input">
+        <h2>enter a sequence of numbers to generate equations</h2>
+        <input id="sequence" type="text" maxlength="8">
+    </div>
+    <div id="output">
+        <h2>using a combination of +, -, *, and / becomes ...</h2>
+        <p id="display">...nothing</p>
+    </div>
+</body>
+
+</html>

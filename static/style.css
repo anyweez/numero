@@ -1,0 +1,38 @@
+body {
+    text-align: center;
+    font-family: 'Indie Flower', cursive;
+}
+
+#input {
+    margin-top: 15%;
+}
+
+h2 {
+    font-size: 1.3em;
+    margin: 2%;
+}
+
+input[type=text] {
+    width: 50%;
+    font-size: 3em;
+    padding: 1%;
+    letter-spacing: 1em;
+    font-family: 'Montserrat', sans-serif;
+    border: 1px solid #383838;
+    color: black;
+    background-color: white;
+}
+
+input[type=text].invalid {
+    border: 1px solid #8B0B0B;
+    background-color: #FFC2C2;
+    color: #8B0B0B;
+}
+
+p#display {
+    font-size: 3em;
+    padding: 1%;
+    margin: 0;
+    letter-spacing: .6em;
+    font-family: 'Montserrat', sans-serif;
+}
